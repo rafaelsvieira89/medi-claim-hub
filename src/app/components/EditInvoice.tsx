@@ -22,12 +22,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { CalendarIcon } from "lucide-react";
 import { SubmitButton } from "./SubmitButtons";
 import { useActionState, useState } from "react";
-import { useForm } from "@conform-to/react";
-import { parseWithZod } from "@conform-to/zod";
+
 import { invoiceSchema } from "../utils/zodSchemas";
 import { createInvoice, editInvoice } from "../actions";
 import { formatCurrency } from "../utils/formatCurrency";
 import { Prisma } from "@prisma/client";
+import {useForm} from "react-hook-form";
 
 interface iAppProps {
     data: Prisma.InvoiceGetPayload<{}>;
@@ -38,7 +38,7 @@ export function EditInvoice({ data }: iAppProps) {
     const [form, fields] = useForm({
         lastResult,
 
-        onValidate({ formData }) {
+        onValidate({ formData }: { formData: any }) {
             return parseWithZod(formData, {
                 schema: invoiceSchema,
             });
