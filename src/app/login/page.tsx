@@ -1,16 +1,9 @@
-import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { auth, signIn } from "../utils/auth";
-import { SubmitButton } from "../components/SubmitButtons";
-import { redirect } from "next/navigation";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {auth, signIn} from "../utils/auth";
+import {SubmitButton} from "../components/SubmitButtons";
+import {redirect} from "next/navigation";
 
 export default async function Login() {
     const session = await auth();
@@ -35,7 +28,7 @@ export default async function Login() {
                         <form
                             action={async (formData) => {
                                 "use server";
-                                await signIn("nodemailer", formData);
+                                await signIn("resend", formData);
                             }}
                             className="flex flex-col gap-y-4"
                         >
