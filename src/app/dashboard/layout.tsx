@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { requireUser } from "../utils/hooks";
 import Link from "next/link";
-import Logo from "../../../public/logo.png"
+import Logo from "../../public/logo.png"
 import Image from "next/image";
 import { DashboardLinks } from "../components/DashboardLinks";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -53,7 +53,7 @@ export default async function DashboardLayout({
                             <Link href="/" className="flex items-center gap-2">
                                 <Image src={Logo} alt="Logo" className="size-7" />
                                 <p className="text-2xl font-bold">
-                                    Invoice<span className="text-blue-600">Marshal</span>
+                                    Medi<span className="text-blue-600">ClaimHub</span>
                                 </p>
                             </Link>
                         </div>
@@ -98,7 +98,7 @@ export default async function DashboardLayout({
                                         <Link href="/dashboard">Dashboard</Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild>
-                                        <Link href="/dashboard/invoices">Invoices</Link>
+                                        <Link href="/dashboard/invoices">Faturas</Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem asChild>
