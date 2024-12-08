@@ -1,51 +1,36 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { CalendarIcon } from "lucide-react";
-import { SubmitButton } from "./SubmitButtons";
-import { useActionState, useState } from "react";
-
-import { invoiceSchema } from "../utils/zodSchemas";
-import { createInvoice, editInvoice } from "../actions";
-import { formatCurrency } from "../utils/formatCurrency";
-import { Prisma } from "@prisma/client";
+import {Badge} from "@/components/ui/badge";
+import {Button} from "@/components/ui/button";
+import {Calendar} from "@/components/ui/calendar";
+import {Card, CardContent} from "@/components/ui/card";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {Popover, PopoverContent, PopoverTrigger,} from "@/components/ui/popover";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import {Textarea} from "@/components/ui/textarea";
+import {CalendarIcon} from "lucide-react";
+import {SubmitButton} from "./SubmitButtons";
+import {useActionState, useState} from "react";
+import {editInvoice} from "../actions";
+import {formatCurrency} from "../utils/formatCurrency";
+import {Prisma} from "@prisma/client";
 import {useForm} from "react-hook-form";
+import {invoiceSchema, TInvoiceSchema} from "@/app/utils/zodSchemas";
+import {zodResolver} from "@hookform/resolvers/zod";
 
 interface iAppProps {
     data: Prisma.InvoiceGetPayload<{}>;
 }
 
-export function EditInvoice({ data }: iAppProps) {
+export function EditInvoice({data}: iAppProps) {
     const [lastResult, action] = useActionState(editInvoice, undefined);
-    const [form, fields] = useForm({
-        lastResult,
-
-        onValidate({ formData }: { formData: any }) {
-            return parseWithZod(formData, {
-                schema: invoiceSchema,
-            });
-        },
-
-        shouldValidate: "onBlur",
-        shouldRevalidate: "onInput",
+    const {
+        register,
+        handleSubmit,
+        formState: {errors}
+    } = useForm<TInvoiceSchema>({
+        resolver: zodResolver(invoiceSchema)
     });
 
     const [selectedDate, setSelectedDate] = useState(data.date);
@@ -54,20 +39,25 @@ export function EditInvoice({ data }: iAppProps) {
     const [currency, setCurrency] = useState(data.currency);
 
     const calcualteTotal = (Number(quantity) || 0) * (Number(rate) || 0);
+
+    const onSubmit = async (formData: TInvoiceSchema) => {
+
+    }
+
     return (
         <Card className="w-full max-w-4xl mx-auto">
             <CardContent className="p-6">
-                <form id={form.id} action={action} onSubmit={form.onSubmit} noValidate>
+                <form onSubmit={handleSubmit((data)=> {})} className="space-y-6" noValidate>
                     <input
+                        {...register('date')}
                         type="hidden"
-                        name={fields.date.name}
                         value={selectedDate.toISOString()}
                     />
-                    <input type="hidden" name="id" value={data.id} />
+                    <input type="hidden" name="id" value={data.id}/>
 
                     <input
                         type="hidden"
-                        name={fields.total.name}
+                        name="totalName"
                         value={calcualteTotal}
                     />
 
@@ -75,13 +65,10 @@ export function EditInvoice({ data }: iAppProps) {
                         <div className="flex items-center gap-4">
                             <Badge variant="secondary">Draft</Badge>
                             <Input
-                                name={fields.invoiceName.name}
-                                key={fields.invoiceName.key}
-                                defaultValue={data.invoiceName}
-                                placeholder="Test 123"
+                                {...register('invoiceName')}
                             />
                         </div>
-                        <p className="text-sm text-red-500">{fields.invoiceName.errors}</p>
+                        <p className="text-sm text-red-500">{errors.invoiceName?.message}</p>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-6 mb-6">
@@ -92,37 +79,14 @@ export function EditInvoice({ data }: iAppProps) {
                   #
                 </span>
                                 <Input
-                                    name={fields.invoiceNumber.name}
-                                    key={fields.invoiceNumber.key}
-                                    defaultValue={data.invoiceNumber}
+                                    {...register('invoiceNumber')}
                                     className="rounded-l-none"
                                     placeholder="5"
                                 />
                             </div>
                             <p className="text-red-500 text-sm">
-                                {fields.invoiceNumber.errors}
+                                {errors.invoiceNumber?.message}
                             </p>
-                        </div>
-
-                        <div>
-                            <Label>Currency</Label>
-                            <Select
-                                defaultValue="USD"
-                                name={fields.currency.name}
-                                key={fields.currency.key}
-                                onValueChange={(value) => setCurrency(value)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select Currency" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="USD">
-                                        United States Dollar -- USD
-                                    </SelectItem>
-                                    <SelectItem value="EUR">Euro -- EUR</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <p className="text-red-500 text-sm">{fields.currency.errors}</p>
                         </div>
                     </div>
 
@@ -131,30 +95,25 @@ export function EditInvoice({ data }: iAppProps) {
                             <Label>From</Label>
                             <div className="space-y-2">
                                 <Input
-                                    name={fields.fromName.name}
-                                    key={fields.fromName.key}
+                                    {...register('fromName')}
                                     placeholder="Your Name"
                                     defaultValue={data.fromName}
                                 />
-                                <p className="text-red-500 text-sm">{fields.fromName.errors}</p>
+                                <p className="text-red-500 text-sm">{errors.fromName?.message}</p>
                                 <Input
                                     placeholder="Your Email"
-                                    name={fields.fromEmail.name}
-                                    key={fields.fromEmail.key}
+                                    {...register('fromEmail')}
                                     defaultValue={data.fromEmail}
                                 />
-                                <p className="text-red-500 text-sm">
-                                    {fields.fromEmail.errors}
-                                </p>
+                                <p className="text-red-500 text-sm">{errors.fromEmail?.message}</p>
                                 <Input
                                     placeholder="Your Address"
-                                    name={fields.fromAddress.name}
-                                    key={fields.fromAddress.key}
+                                    {...register('fromAddress')}
                                     defaultValue={data.fromAddress}
                                 />
-                                <p className="text-red-500 text-sm">
-                                    {fields.fromAddress.errors}
-                                </p>
+
+                                    <p className="text-red-500 text-sm">{errors.fromAddress?.message}</p>
+
                             </div>
                         </div>
 
@@ -162,32 +121,21 @@ export function EditInvoice({ data }: iAppProps) {
                             <Label>To</Label>
                             <div className="space-y-2">
                                 <Input
-                                    name={fields.clientName.name}
-                                    key={fields.clientName.key}
+                                    {...register('clientName')}
                                     defaultValue={data.clientName}
                                     placeholder="Client Name"
                                 />
-                                <p className="text-red-500 text-sm">
-                                    {fields.clientName.errors}
-                                </p>
+                                    <p className="text-red-500 text-sm">{errors.clientName?.message}</p>
+
                                 <Input
-                                    name={fields.clientEmail.name}
-                                    key={fields.clientEmail.key}
+                                    {...register('clientEmail')}
                                     defaultValue={data.clientEmail}
                                     placeholder="Client Email"
                                 />
                                 <p className="text-red-500 text-sm">
-                                    {fields.clientEmail.errors}
+                                    <p className="text-red-500 text-sm">{errors.clientEmail?.message}</p>
                                 </p>
-                                <Input
-                                    name={fields.clientAddress.name}
-                                    key={fields.clientAddress.key}
-                                    defaultValue={data.clientAddress}
-                                    placeholder="Client Address"
-                                />
-                                <p className="text-red-500 text-sm">
-                                    {fields.clientAddress.errors}
-                                </p>
+
                             </div>
                         </div>
                     </div>
@@ -203,7 +151,7 @@ export function EditInvoice({ data }: iAppProps) {
                                         variant="outline"
                                         className="w-[280px] text-left justify-start"
                                     >
-                                        <CalendarIcon />
+                                        <CalendarIcon/>
 
                                         {selectedDate ? (
                                             new Intl.DateTimeFormat("en-US", {
@@ -223,18 +171,17 @@ export function EditInvoice({ data }: iAppProps) {
                                     />
                                 </PopoverContent>
                             </Popover>
-                            <p className="text-red-500 text-sm">{fields.date.errors}</p>
+                            <p className="text-red-500 text-sm">{errors.date?.message}</p>
                         </div>
 
                         <div>
                             <Label>Invoice Due</Label>
                             <Select
-                                name={fields.dueDate.name}
-                                key={fields.dueDate.key}
+                                {...register('dueDate')}
                                 defaultValue={data.dueDate.toString()}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select due date" />
+                                    <SelectValue placeholder="Select due date"/>
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="0">Due on Reciept</SelectItem>
@@ -242,7 +189,7 @@ export function EditInvoice({ data }: iAppProps) {
                                     <SelectItem value="30">Net 30</SelectItem>
                                 </SelectContent>
                             </Select>
-                            <p className="text-red-500 text-sm">{fields.dueDate.errors}</p>
+                            <p className="text-red-500 text-sm">{errors.dueDate?.message}</p>
                         </div>
                     </div>
 
@@ -255,43 +202,7 @@ export function EditInvoice({ data }: iAppProps) {
                         </div>
 
                         <div className="grid grid-cols-12 gap-4 mb-4">
-                            <div className="col-span-6">
-                                <Textarea
-                                    name={fields.invoiceItemDescription.name}
-                                    key={fields.invoiceItemDescription.key}
-                                    defaultValue={data.invoiceItemDescription}
-                                    placeholder="Item name & description"
-                                />
-                                <p className="text-red-500 text-sm">
-                                    {fields.invoiceItemDescription.errors}
-                                </p>
-                            </div>
-                            <div className="col-span-2">
-                                <Input
-                                    name={fields.invoiceItemQuantity.name}
-                                    key={fields.invoiceItemQuantity.key}
-                                    type="number"
-                                    placeholder="0"
-                                    value={quantity}
-                                    onChange={(e) => setQuantity(e.target.value)}
-                                />
-                                <p className="text-red-500 text-sm">
-                                    {fields.invoiceItemQuantity.errors}
-                                </p>
-                            </div>
-                            <div className="col-span-2">
-                                <Input
-                                    name={fields.invoiceItemRate.name}
-                                    key={fields.invoiceItemRate.key}
-                                    value={rate}
-                                    onChange={(e) => setRate(e.target.value)}
-                                    type="number"
-                                    placeholder="0"
-                                />
-                                <p className="text-red-500 text-sm">
-                                    {fields.invoiceItemRate.errors}
-                                </p>
-                            </div>
+
                             <div className="col-span-2">
                                 <Input
                                     value={formatCurrency({
@@ -330,17 +241,16 @@ export function EditInvoice({ data }: iAppProps) {
                     <div>
                         <Label>Note</Label>
                         <Textarea
-                            name={fields.note.name}
-                            key={fields.note.key}
+                            {...register('note')}
                             defaultValue={data.note ?? undefined}
                             placeholder="Add your Note/s right here..."
                         />
-                        <p className="text-red-500 text-sm">{fields.note.errors}</p>
+                        <p className="text-red-500 text-sm">{errors.note?.message}</p>
                     </div>
 
                     <div className="flex items-center justify-end mt-6">
                         <div>
-                            <SubmitButton text="Update Invoice" />
+                            <SubmitButton text="Update Invoice"/>
                         </div>
                     </div>
                 </form>

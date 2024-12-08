@@ -40,3 +40,5 @@ export const invoiceSchema = z.object({
 
     invoiceItemRate: z.number().min(1, "Rate min 1"),
 });
+
+export type TInvoiceSchema = z.infer<typeof invoiceSchema>;
