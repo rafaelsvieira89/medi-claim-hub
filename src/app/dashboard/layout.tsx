@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { requireUser } from "../utils/hooks";
 import Link from "next/link";
-import Logo from "@/public/logo.png";
+import Logo from "../../../public/logo.png"
 import Image from "next/image";
 import { DashboardLinks } from "../components/DashboardLinks";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -32,7 +32,7 @@ async function getUser(userId: string) {
         },
     });
 
-    if (!data?.firstName || !data.lastName || !data.address) {
+    if (!data?.firstName || !data.lastName) {
         redirect("/onboarding");
     }
 }
